@@ -1,6 +1,6 @@
 [general]
-name= myPlugin
-description=This is a minimal plugin
+name= Rural Water
+description=a QGIS python plugin to make typology-specific Rural Water Security Plans. These plans help lead the user from data to decisions
 version=0.1
 qgisMinimumVersion=3.0
 author=Craig Dsouza
