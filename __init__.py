@@ -1,4 +1,4 @@
-from .myPlugin import pluginClass
+from .ruralwater import RuralWaterClass
 
 def classFactory(iface):
-    return pluginClass(iface)
+    return RuralWaterClass(iface)
