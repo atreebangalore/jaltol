@@ -49,6 +49,11 @@ class RuralWaterClass:
       self.vlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
       QgsProject.instance().addMapLayer(self.vlayer)
       
+      alayer = self.iface.activeLayer()
+      single_symbol_renderer = alayer.renderer()
+      symbol = single_symbol_renderer.symbol()
+      symbol.symbolLayer(0).setBrushStyle(Qt.BrushStyle(Qt.NoBrush))
+      
       self.getStates()
       
     def getStates(self):
