@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 
 from datetime import datetime
 from .ruralwater_dialog import RuralWaterDialog
+from . import Map
 
 print(ee.String('Hello World from EE!').getInfo())
 inspect_getfile = inspect.getfile(inspect.currentframe())
@@ -128,6 +129,9 @@ class RuralWaterClass:
       self.iface.messageBar().pushMessage('Time is {}'.format(current_time))
         
     def run(self):
+      image = ee.Image('users/gsnshinde/UPSCAPE_LULCFInal/LULC_2020_21Class')
+      Map.addLayer(image, {'palette': ['d63000','ecb70c','0b4a8b','cccccc','9cec27','cccccc','26ae09','00ffff'], 'min': 0, 'max': 7}, 'lulc 2020_21', True)
+        
       self.dlg = RuralWaterDialog()
       self.dlg.show()
       
