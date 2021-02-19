@@ -1,4 +1,5 @@
 import os
+import ee
 import sys
 import inspect
 from qgis.core import QgsProject,QgsVectorLayer,QgsProject,QgsFeature,QgsFeatureRequest,QgsExpression
@@ -11,7 +12,7 @@ from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 from datetime import datetime
 from .ruralwater_dialog import RuralWaterDialog
 
-
+print(ee.String('Hello World from EE!').getInfo())
 inspect_getfile = inspect.getfile(inspect.currentframe())
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
