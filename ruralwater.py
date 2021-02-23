@@ -1,5 +1,6 @@
 import os
 import ee
+import pandas as pd
 import sys
 import inspect
 from qgis.core import QgsProject,QgsVectorLayer,QgsProject,QgsFeature,QgsFeatureRequest,QgsExpression
@@ -80,22 +81,27 @@ class RuralWaterClass:
           li.append(fea['dist_name'])
       self.dlg.comboBox_2.clear()
       self.dlg.comboBox_2.addItems(set(li))
-
+      
+      
     def getBlocks(self):
       print("called get Block")
-      dist = self.dlg.comboBox_2.currentText()
-      print("chosen district:",dist)
+      self.dist = self.dlg.comboBox_2.currentText()
+      print("chosen district:",self.dist)
       feas = self.vlayer.getFeatures()
       li = []
       for fea in feas:
-        if (fea['dist_name']==dist):
+        if (fea['dist_name']==self.dist):
             if (fea['sdst_name']==None):
                 li.append("BLANK")
             else:
                 li.append(fea['sdst_name'])
       self.dlg.comboBox_3.clear()
       self.dlg.comboBox_3.addItems(set(li))
-
+      
+      distRain = self.df.loc[self.df.District=="Thanjavur"]
+      rainStats = distRain.January.mean()
+      self.dlg.lineEdit_3.setText("Mean January rainfall 2004-2011 in {dist} is:".format(dist="Thanjavur") + str(rainStats))
+      
     def getVillages(self):
       print("called get Villages")
       sdst = self.dlg.comboBox_3.currentText()
@@ -127,11 +133,20 @@ class RuralWaterClass:
       now = datetime.now()
       current_time = now.strftime("%H:%M:%S")
       self.iface.messageBar().pushMessage('Time is {}'.format(current_time))
-        
+    
+    def getRainStats(self):
+      distRain = self.df.loc[self.df.District==self.dist]
+      rainStats = distRain.January.mean()
+      self.dlg.lineEdit_3.clear()
+      self.dlg.lineEdit_3.setText("Mean January rainfall 2004-2011 in {dist} is:".format(dist=self.dist) + str(rainStats))
+      
     def run(self):
       image = ee.Image('users/gsnshinde/UPSCAPE_LULCFInal/LULC_2020_21Class')
-      Map.addLayer(image, {'palette': ['d63000','ecb70c','0b4a8b','cccccc','9cec27','cccccc','26ae09','00ffff'], 'min': 0, 'max': 7}, 'lulc 2020_21', True)
-        
+      paletteLULC = ['02451E','06FC6D','FC0D06','28B505','750776','C713A9','C713A9','C713A9','E27FF9','E27FF9','E27FF9','765904','765904','765904','EAB828','EAB828','EAB828','092CEE','09EECB','Grey','Black']
+      Map.addLayer(image, {'palette': paletteLULC, 'min': 0, 'max': 20}, 'lulc 2020_21', True)
+      imd_path = "https://storage.googleapis.com/imd-precipitation-historical-districts/IMD_Precipitation_TN_2004_2011.csv"
+      self.df = pd.read_csv(imd_path)
+      print(type(self.df))  
       self.dlg = RuralWaterDialog()
       self.dlg.show()
       
@@ -140,3 +155,4 @@ class RuralWaterClass:
       self.dlg.comboBox_2.currentTextChanged.connect(self.getBlocks)
       self.dlg.comboBox_3.currentTextChanged.connect(self.getVillages)
       self.dlg.comboBox_4.currentTextChanged.connect(self.zoomVillage)
+#      self.dlg.lineEdit_3.textChanged.connect(self.getRainStats)

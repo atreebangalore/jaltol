@@ -6,32 +6,74 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>466</width>
-    <height>468</height>
+    <width>470</width>
+    <height>364</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>Boundary File</string>
+   <item row="0" column="0" colspan="2">
+    <widget class="QgsCollapsibleGroupBox" name="mGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
+     <property name="title">
+      <string>Import Vector Boundaries</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Select File</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>137</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QLineEdit" name="lineEdit"/>
    </item>
    <item row="1" column="1">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QComboBox" name="comboBox"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="comboBox_2"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>...</string>
+      <string>District</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Village</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
     <widget class="QLabel" name="label">
      <property name="minimumSize">
       <size>
@@ -44,40 +86,34 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QComboBox" name="comboBox"/>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="label_2">
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_6">
      <property name="text">
-      <string>District</string>
+      <string>LULC</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QComboBox" name="comboBox_2"/>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Precipitation</string>
+     </property>
+    </widget>
    </item>
-   <item row="4" column="0">
+   <item row="3" column="0">
     <widget class="QLabel" name="label_3">
      <property name="text">
       <string>Block</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="3" column="1">
     <widget class="QComboBox" name="comboBox_3"/>
    </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Village</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="1">
-    <widget class="QComboBox" name="comboBox_4"/>
+    <widget class="QLineEdit" name="lineEdit_2"/>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -87,8 +123,42 @@
      </property>
     </widget>
    </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="comboBox_4"/>
+   </item>
+   <item row="8" column="1">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="text">
+      <string>Get</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLineEdit" name="lineEdit_3"/>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>qgscollapsiblegroupbox.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
