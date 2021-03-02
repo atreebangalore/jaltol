@@ -3,6 +3,7 @@ import ee
 import pandas as pd
 import sys
 import inspect
+import qgis.core
 from qgis.core import QgsProject,QgsVectorLayer,QgsProject,QgsFeature,QgsFeatureRequest,QgsExpression
 from qgis.gui import *
 
@@ -12,7 +13,10 @@ from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 
 from datetime import datetime
 from .ruralwater_dialog import RuralWaterDialog
-from . import Map
+from gee import Map
+from vectors import getLocalBoundaries
+
+print(dir(getLocalBoundaries))   # functions within module aren't registering.. dunno why
 
 print(ee.String('Hello World from EE!').getInfo())
 inspect_getfile = inspect.getfile(inspect.currentframe())
@@ -60,25 +64,26 @@ class RuralWaterClass:
       
     def getStates(self):
       print("called get States")
-      feas = self.vlayer.getFeatures()
-      li = []
-      for fea in feas:
-        if (fea['stat_name']==None):
-          li.append("BLANK")
-        else:
-          li.append(fea['stat_name'])
+      li = self.vlayer.uniqueValues(1)
+      if qgis.core.NULL in li:
+          li.remove(qgis.core.NULL)
       self.dlg.comboBox.clear()
-      self.dlg.comboBox.addItems(set(li))
+      self.dlg.comboBox.addItems(li)
 
     def getDistricts(self):
       print("called get Districts")
-      feas = self.vlayer.getFeatures()
+      self.state = self.dlg.comboBox.currentText()
+      stateFilter = "\"stat_name\"='" + self.state + "'"
+      expr = QgsExpression(stateFilter)
+      stateFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
+      
       li = []
-      for fea in feas:
+      for fea in stateFeas:
         if (fea['dist_name']==None):
           li.append("BLANK")
         else:
           li.append(fea['dist_name'])
+
       self.dlg.comboBox_2.clear()
       self.dlg.comboBox_2.addItems(set(li))
       
@@ -86,45 +91,46 @@ class RuralWaterClass:
     def getBlocks(self):
       print("called get Block")
       self.dist = self.dlg.comboBox_2.currentText()
-      print("chosen district:",self.dist)
-      feas = self.vlayer.getFeatures()
+      distFilter = "\"dist_name\"='" + self.dist + "'"
+      expr = QgsExpression(distFilter)
+      distFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
+      
       li = []
-      for fea in feas:
-        if (fea['dist_name']==self.dist):
-            if (fea['sdst_name']==None):
-                li.append("BLANK")
-            else:
-                li.append(fea['sdst_name'])
+      for fea in distFeas:
+        if (fea['sdst_name']==None):
+          li.append("BLANK")
+        else:
+          li.append(fea['sdst_name'])
+
       self.dlg.comboBox_3.clear()
       self.dlg.comboBox_3.addItems(set(li))
       
-      distRain = self.df.loc[self.df.District=="Thanjavur"]
-      rainStats = distRain.January.mean()
-      self.dlg.lineEdit_3.setText("Mean January rainfall 2004-2011 in {dist} is:".format(dist="Thanjavur") + str(rainStats))
+#      distRain = self.df.loc[self.df.District=="Thanjavur"]
+#      rainStats = distRain.January.mean()
+#      self.dlg.lineEdit_3.setText("Mean January rainfall 2004-2011 in {dist} is:".format(dist="Thanjavur") + str(rainStats))
       
     def getVillages(self):
       print("called get Villages")
-      sdst = self.dlg.comboBox_3.currentText()
-      print("chosen sub district:",sdst)
-      feas = self.vlayer.getFeatures()
+      self.block = self.dlg.comboBox_3.currentText()
+      blockFilter = "\"sdst_name\"='" + self.block + "'"
+      expr = QgsExpression(blockFilter)
+      blockFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
+      
       li = []
-      for fea in feas:
-        if (fea['sdst_name']==sdst):
-            if (fea['vlgcd2011']==None):
-                li.append("BLANK")
-            else:
-                li.append(fea['vlgcd2011'])
+      for fea in blockFeas:
+        if (fea['vlgcd2011']==None):
+            li.append("BLANK")
+        else:
+            li.append(fea['vlgcd2011'])
+            
       self.dlg.comboBox_4.clear()
       self.dlg.comboBox_4.addItems(set(li))
     
     def zoomVillage(self):
       print("called zoom to village")
       vlg = self.dlg.comboBox_4.currentText()
-      print("chosen village:",vlg)
       vlgstring = "\"vlgcd2011\"='"+vlg+"'"
-      print("Expression text: ",vlgstring)
       expr = QgsExpression(vlgstring)
-      
       vlgFea = self.vlayer.getFeatures(QgsFeatureRequest(expr))
       self.vlayer.selectByExpression(vlgstring)
       self.iface.actionZoomToSelected().trigger()
