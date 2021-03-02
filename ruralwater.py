@@ -6,7 +6,7 @@ import inspect
 from qgis.core import QgsProject,QgsVectorLayer,QgsProject,QgsFeature,QgsFeatureRequest,QgsExpression
 from qgis.gui import *
 
-from PyQt5.QtWidgets import QAction, QFileDialog
+from PyQt5.QtWidgets import QAction, QFileDialog, QDockWidget
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 
