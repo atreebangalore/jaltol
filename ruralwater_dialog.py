@@ -7,7 +7,7 @@ WIDGET,BASE = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'rw_dockwidget_base.ui'))
 
 
-class RuralWaterDialog(BASE, WIDGET):
-    def __init__(self, parent=None):
-        super(RuralWaterDialog, self).__init__(parent)
+class RuralWaterDockWidget(BASE, WIDGET):
+    def __init__(self, parent=None, iface=None):
+        super(RuralWaterDockWidget, self).__init__(parent)
         self.setupUi(self)

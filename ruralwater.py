@@ -12,7 +12,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 
 from datetime import datetime
-from .ruralwater_dialog import RuralWaterDialog
+from .ruralwater_dialog import RuralWaterDockWidget
 from gee import Map
 from vectors import getLocalBoundaries
 
@@ -162,9 +162,16 @@ class RuralWaterClass:
       imd_path = "https://storage.googleapis.com/imd-precipitation-historical-districts/IMD_Precipitation_TN_2004_2011.csv"
       self.df = pd.read_csv(imd_path)
       print(type(self.df))  
-      self.dlg = RuralWaterDialog()
+      self.dlg = RuralWaterDockWidget(
+                  parent=self.iface.mainWindow(), iface=self.iface)
       self.dlg.show()
       
+      self.dlg.setAllowedAreas(
+                    Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+
+      self.iface.addDockWidget(Qt.RightDockWidgetArea,
+                                         self.dlg)
+    
       self.populate_lulc_choices()
       self.dlg.pushButton.clicked.connect(self.select_output_file)      # Select shape file 
       self.dlg.pushButton_2.clicked.connect(self.add_lulc_image)
