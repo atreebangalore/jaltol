@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="images">
+    <file>atree_logo_rect.svg</file>
+    <file>atree_logo_rect.png</file>
+  </qresource>
+</RCC>
