@@ -18,7 +18,8 @@ from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 
 from datetime import datetime
 from .ruralwater_dialog import RuralWaterDockWidget
-from . import Map
+import ee
+from ee_plugin import Map
 #from vectors import getLocalBoundaries
 
 #print(dir(getLocalBoundaries))   # functions within module aren't registering.. dunno why
@@ -183,7 +184,7 @@ class RuralWaterClass:
       image = ee.Image(geeAssetString)
       print(image)
       paletteLULC = ['02451E','06FC6D','FC0D06','28B505','750776','C713A9','C713A9','C713A9','E27FF9','E27FF9','E27FF9','765904','765904','765904','EAB828','EAB828','EAB828','092CEE','09EECB','Grey','Black']
-      Map.addLayer(image, {'palette': paletteLULC, 'min': 0, 'max': 20}, 'lulc 2020_21', True)
+      Map.addLayer(image, {'palette': paletteLULC, 'min': 0, 'max': 20}, 'lulc', True)
     
     def run(self):
       #imd_path = "https://storage.googleapis.com/imd-precipitation-historical-districts/IMD_Precipitation_TN_2004_2011.csv"
