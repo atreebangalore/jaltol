@@ -48,6 +48,10 @@ class RuralWaterClass:
       self.iface.removePluginMenu('&Rural Water', self.action)      # remove action from plugin menu
       del self.action
 
+    ##########################################################################
+    ##                            AOI                                       ##
+    ##########################################################################
+
     def select_output_file(self):
       print("called select_output_file")
       filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
@@ -133,88 +137,253 @@ class RuralWaterClass:
     
     def zoom_village(self):
       print("called zoom to village")
-      vlg = self.dlg.comboBox_4.currentText()
-      vlgstring = "\"VCT_Cd\"='"+vlg+"'"
+      self.vlg = self.dlg.comboBox_4.currentText()
+      vlgstring = "\"VCT_Cd\"='"+self.vlg+"'"
       expr = QgsExpression(vlgstring)
       vlgFea = self.vlayer.getFeatures(QgsFeatureRequest(expr))
       self.vlayer.selectByExpression(vlgstring)
       self.iface.actionZoomToSelected().trigger()
       
+    ##########################################################################
+    ##                       Water Balance Layers                           ##
+    ##########################################################################
     
-    def show_rain_stats(self):
-      figNos = plt.get_fignums()
-      if len(figNos)>0:
-          print("figure already exists")
-          for no in figNos:
-              plt.close(no)
-      print("get Rain Stats called")
-      self.rainDist = self.dlg.lineEdit_2.text()
-      self.rainYear = self.dlg.comboBox_6.currentText()
-      distRain = self.df.loc[(self.df.District==self.rainDist) & (self.df.Year==int(self.rainYear)),"January":"December"]
-      
-      fig,ax = plt.subplots()
-      ax.bar(distRain.columns,distRain.iloc[0])
-      plt.show()
-    
+    ####       POPULATE UI       ####
+
     def populate_lulc_choices(self):
-      li = ["2001","2009","2016","2017","2018","2019","2020"]
+      li = ["2000","2015","2016","2017","2018","2019"]
       self.dlg.comboBox_5.clear()
       self.dlg.comboBox_5.addItems(sorted(set(li)))
     
-    def populate_rain_year_choices(self):
-      li = list(range(2000,2021))
+    def populate_layer_list(self,layer):
+      if layer=='rain':
+        start,end=(2000,2020)
+      elif layer=='et':
+        start,end=(2003,2020)
+      elif layer=='sm':
+        start,end=(2015,2020)
+      elif layer=='groundwater':
+        start,end=(1996,2016)
+      elif layer=='surfacewater':
+        start,end=(2000,2021)
+      elif layer=='wbyear':
+        start,end=(2000,2017)
+      else:
+        print("incorrect layer name provided to populate layer list")
+
+      li = list(range(start,end))
       years = [str(yr) for yr in li]
-      self.dlg.comboBox_9.clear()
-      self.dlg.comboBox_9.addItems(sorted(years))
-      
-    def populate_et_year_choices(self):
-      li = list(range(2003,2021))
-      years = [str(yr) for yr in li]
-      self.dlg.comboBox_11.clear()
-      self.dlg.comboBox_11.addItems(sorted(years))
-    
-    def add_lulc_image(self):
-      chosenLULCYr = self.dlg.comboBox_5.currentText()
-      geeAssetString = 'users/cseicomms/lulc_13class/KA_' + chosenLULCYr
+
+      if layer=='rain':
+        self.dlg.comboBox_9.clear()
+        self.dlg.comboBox_9.addItems(sorted(years))
+      elif layer=='et':
+        self.dlg.comboBox_11.clear()
+        self.dlg.comboBox_11.addItems(sorted(years))
+      elif layer=='sm':
+        self.dlg.comboBox_13.clear()
+        self.dlg.comboBox_13.addItems(sorted(years))
+      elif layer=='groundwater':
+        self.dlg.comboBox_12.clear()
+        self.dlg.comboBox_12.addItems(sorted(years))
+      elif layer=='surfacewater':
+        self.dlg.comboBox_10.clear()
+        self.dlg.comboBox_10.addItems(sorted(years))
+      elif layer=='wbyear':
+        self.dlg.comboBox_6.clear()
+        self.dlg.comboBox_6.addItems(sorted(years))
+      else:
+        print("incorrect layer name provided to populate layer list")
+
+    ####      DEFINE LAYERS      ####
+
+    def make_lulc_image(self):
+      geeAssetString = 'users/cseicomms/lulc_13class/KA_' + str(int(self.lulc_yr)+1)
       print(geeAssetString)
-      image = ee.Image(geeAssetString)
-      print(image)
-      paletteLULC = ['02451E','06FC6D','FC0D06','28B505','750776','C713A9','C713A9','C713A9','E27FF9','E27FF9','E27FF9','765904','765904','765904','EAB828','EAB828','EAB828','092CEE','09EECB','Grey','Black']
-      lulc_label = 'lulc_' + chosenLULCYr
-      Map.addLayer(image, {'palette': paletteLULC, 'min': 0, 'max': 20}, lulc_label, True)
-      Map.centerObject(image,10)
-    
-    def add_rain_image(self):
+      self.lulc = ee.Image(geeAssetString)
+      print(type(self.lulc))
+
+    def make_rain_image(self):
       rainColl = ee.ImageCollection("users/cseicomms/rainfall_imd")
-      chosenRainYr = int(self.dlg.comboBox_9.currentText())
-      start = ee.Date.fromYMD(chosenRainYr,6,1)
-      end = ee.Date.fromYMD(chosenRainYr+1,5,31)
-      rain = rainColl.filterDate(start,end).sum()
-      print(rain)
+      start = ee.Date.fromYMD(int(self.rain_year),6,1)
+      end = ee.Date.fromYMD(int(self.rain_year)+1,5,31)
+      self.rain = rainColl.filterDate(start,end).sum()
+      print(type(self.rain))
+
+    def make_et_image(self):
+      geeAssetString = 'users/cseicomms/evapotranspiration_ssebop/wy' + self.et_year
+      self.et = ee.Image(geeAssetString)
+      print(type(self.et))
+
+    def make_sw_image(self):
+      print(type(self.sw_year),self.sw_year)
+      y1str = 'users/cseicomms/surfacewater/preMonsoonVolume/' + self.sw_year
+      y2str = 'users/cseicomms/surfacewater/preMonsoonVolume/' + str(int(self.sw_year) + 1)
+      year1 = ee.Image(y1str)
+      year2 = ee.Image(y2str)
+      print(y1str,y2str)
+      y1unmask = year1.subtract(year1)
+      y2unmask = year2.subtract(year2)
+
+      self.sw = year2.unmask(y1unmask).subtract(year1.unmask(y2unmask))
+      print(type(self.sw))
+
+    def make_gw_image(self):
+      print(type(self.gw_year),self.gw_year)
+      rcstr = 'users/cseicomms/groundwater/recharge/' + self.gw_year
+      dcstr = 'users/cseicomms/groundwater/discharge/' + self.gw_year
+      rc = ee.Image(rcstr)
+      dc = ee.Image(dcstr)
+      print(rcstr,dcstr)
+      sy = 0.01
+      self.gw = rc.subtract(dc).multiply(1000).multiply(sy)
+      print(type(self.gw))
+
+    def make_sm_image(self):
+      smColl = ee.ImageCollection("NASA_USDA/HSL/SMAP10KM_soil_moisture");
+      print(type(self.sm_year),self.sm_year)
+
+      year = int(self.sm_year)
+      myFilter = ee.Filter.And(ee.Filter.calendarRange(year,year,'year'),ee.Filter.calendarRange(5,5,'month'))
+      year1 = smColl.filter(myFilter).select('susm').median()
+
+      year = int(self.sm_year) + 1
+      myFilter = ee.Filter.And(ee.Filter.calendarRange(year,year,'year'),ee.Filter.calendarRange(5,5,'month'))
+      year2 = smColl.filter(myFilter).select('susm').median()
+
+      self.sm = year2.subtract(year1)
+      print(type(self.sm))
+
+    ####      ADD LAYERS TO MAP      ####
+
+    def add_lulc_image(self):
+      self.lulc_yr = self.dlg.comboBox_5.currentText()
+      self.make_lulc_image()
+
+      paletteLULC = ['02451E','06FC6D','FC0D06','28B505','750776','C713A9','C713A9',
+                      'C713A9','E27FF9','E27FF9','E27FF9','765904','765904','765904',
+                      'EAB828','EAB828','EAB828','092CEE','09EECB','Grey','Black']
+      lulc_label = 'lulc_' + self.lulc_yr
+      Map.addLayer(self.lulc, {'palette': paletteLULC, 'min': 0, 'max': 20}, lulc_label, True)
+      Map.centerObject(self.lulc,10)
+
+    def add_rain_image(self):
+      self.rain_year = int(self.dlg.comboBox_9.currentText())
+      self.make_rain_image()
       paletteRain = ['ff0','fff','00f']
       rainViz = {'min':400,'max':2000,'palette':paletteRain}
-      rain_label = 'rain_' + str(chosenRainYr)
-      Map.addLayer(rain, rainViz, rain_label, True)
+      rain_label = 'rain_' + str(self.rain_year)
+      Map.addLayer(self.rain, rainViz, rain_label, True)
+      self.rain = None
+      self.rain_year = None
 
     def add_et_image(self):
-      chosenETYr = self.dlg.comboBox_11.currentText()
-      geeAssetString = 'users/cseicomms/evapotranspiration_ssebop/wy' + chosenETYr
-      image = ee.Image(geeAssetString)
-      et_label = 'et_' + chosenETYr
-      Map.addLayer(image,{'min':300,'max':1500},et_label,True)
+      self.et_year = self.dlg.comboBox_11.currentText()
+      self.make_et_image()
+      et_label = 'et_' + self.et_year
+      Map.addLayer(self.et,{'min':300,'max':1500},et_label,True)
+      self.et = None
+      self.et_year = None
 
-    def query_et_image(self):
-      # geometry = json.loads(self.vlayer.selectedFeatures()[0].geometry().asJson())
-      # print(geometry)
-      # polygon = ee.Geometry.MultiPolygon(geometry['coordinates'])
-      # print(polygon)
+    def add_sw_image(self):
+      self.sw_year = self.dlg.comboBox_10.currentText()
+      self.make_sw_image()
+      paletteSW = ['#f00','#000','#00f']
+      swViz = {'min':-80,'max':80,'palette':paletteSW}
+      sw_label = 'sw_' + self.sw_year
+      Map.addLayer(self.sw,swViz,sw_label,True)
+      self.sw = None
+      self.sw_year = None
+
+    def add_gw_image(self):
+      self.gw_year = self.dlg.comboBox_12.currentText()
+      self.make_gw_image()
+      paletteGW = ['#f00','#fff','#0f0']
+      gwViz = {'min':-80,'max':80,'palette':paletteGW}
+      gw_label = 'gw_' + self.gw_year
+      Map.addLayer(self.gw,gwViz,gw_label,True)
+      self.gw = None
+      self.gw_year = None
+
+    def add_sm_image(self):
+      self.sm_year = self.dlg.comboBox_13.currentText()
+      self.make_sm_image()
+      paletteSM = ['#f00','#fff','#0f0']
+      smViz = {'min':-80,'max':80,'palette':paletteSM}
+      sm_label = 'sm_' + self.sm_year
+      Map.addLayer(self.sm,smViz,sm_label,True)
+      self.sm = None
+      self.sm_year = None
+    
+    ####      CALC WATER BALANCE VALUES      ####
+    def calc_rain_value(self):
+      try:
+        self.rain_value = str(self.rain.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        print("rain value: ", self.rain_value)
+      except:
+        print(self.rain_year + " " + "rainfall image not found")
+        self.rain_value = "NA"
+
+    def calc_et_value(self):
+      try:
+        self.et_value = str(self.et.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        print("et value: ", self.et_value)
+      except:
+        print(self.et_year + " " + "et image not found")
+        self.et_value = "NA"
+
+    def calc_sw_value(self):
+      try:
+        self.sw_value = str(self.sw.reduceRegion(ee.Reducer.sum(),self.polygon,100).getInfo()['Volume'])
+        print("sw value: ", self.sw_value)
+      except:
+        print(self.sw_year + " " + "surface water image not found")
+        self.sw_value = "NA"
+
+    def calc_gw_value(self):
+      try:
+        self.gw_value = str(self.gw.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        print("gw value: ", self.gw_value)
+      except:
+        print(self.gw_year + " " + "groundwater image not found")
+        self.gw_value = "NA"
+
+    def calc_sm_value(self):
+      try:
+        self.sm_value = str(self.sm.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['susm'])
+        print("sm value: ", self.sm_value)
+      except:
+        print(self.sm_year + " " + "soil moisture image not found")
+        self.sm_value = "NA"
+
+    def calc_water_balance(self):
+      self.rain_year = self.et_year = self.gw_year = self.sw_year = self.sm_year = self.dlg.comboBox_6.currentText()
+      self.make_rain_image()
+      self.calc_rain_value()
+      self.make_et_image()
+      self.calc_et_value()
+      self.make_sw_image()
+      self.calc_sw_value()
+      self.make_gw_image()
+      self.calc_gw_value()
+      self.make_sm_image()
+      self.calc_sm_value()
+
+
+    def print_water_balance(self):
+      geometry = json.loads(self.vlayer.selectedFeatures()[0].geometry().asJson())
+      #print(geometry)
+      self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'])
+      #print(self.polygon)
+
+      self.calc_water_balance()
+
       project = QgsProject.instance()
       print("project title is: ",project.title())
       layout = QgsLayout(project)
       print("layout initialized")
       layout.initializeDefaults()
 
-      print("query et image called")
       template = os.path.join(cmd_folder,"resources","water_balance.qpt")
       print(type(template))
 
@@ -229,13 +398,37 @@ class RuralWaterClass:
 
       # adding to existing items
       items, ok = layout.loadFromTemplate(doc, QgsReadWriteContext(), False)
-      prec_label = layout.itemById('precipitation')
-      print("got precipitation label")
-      prec_label.setText('1000')
+
+      rain_label = layout.itemById('precipitation')
+      print("got rainfall label")
+      rain_label.setText(self.rain_value)
+
+      et_label = layout.itemById('evapotranspiration')
+      print("got evapotranspiration label")
+      et_label.setText(self.et_value)
+
+      sw_label = layout.itemById('surfacewater')
+      print("got surfacewater label")
+      sw_label.setText(self.sw_value)
+
+      gw_label = layout.itemById('groundwater')
+      print("got groundwater label")
+      gw_label.setText(self.gw_value)
+
+      sm_label = layout.itemById('soilmoisture')
+      print("got soilmoisture label")
+      sm_label.setText(self.sm_value)
+
+      villname_label = layout.itemById('villname')
+      print("got villname label")
+      villname_label.setText(self.vlg)
+
+      year_label = layout.itemById('year')
+      print("got year label from rainfall")
+      year_label.setText(self.dlg.comboBox_9.currentText())
 
       exporter = QgsLayoutExporter(layout)
-      # output_image = os.path.join(home_dir, 'Desktop', '{}.png'.format("sample"))
-      output_image = os.path.join(cmd_folder,"resources",'{}.png'.format("sample"))
+      output_image = os.path.join(home_dir, 'Desktop', '{}.png'.format("water_budget"))
       print(output_image)
       result = exporter.exportToImage(output_image, QgsLayoutExporter.ImageExportSettings())
       print(result)
@@ -256,14 +449,21 @@ class RuralWaterClass:
       self.iface.addDockWidget(Qt.RightDockWidgetArea,self.dlg)
     
       self.populate_lulc_choices()
-      self.populate_rain_year_choices()
-      self.populate_et_year_choices()
+      self.populate_layer_list('rain')
+      self.populate_layer_list('et')
+      self.populate_layer_list('sm')
+      self.populate_layer_list('groundwater')
+      self.populate_layer_list('surfacewater')
+      self.populate_layer_list('wbyear')
       
       self.dlg.pushButton.clicked.connect(self.select_output_file)      # Select shape file 
       self.dlg.pushButton_2.clicked.connect(self.add_lulc_image)
-      self.dlg.pushButton_8.clicked.connect(self.add_et_image)
       self.dlg.pushButton_3.clicked.connect(self.add_rain_image)
-      self.dlg.pushButton_10.clicked.connect(self.query_et_image)
+      self.dlg.pushButton_8.clicked.connect(self.add_et_image)
+      self.dlg.pushButton_6.clicked.connect(self.add_sw_image)
+      self.dlg.pushButton_7.clicked.connect(self.add_gw_image)
+      self.dlg.pushButton_9.clicked.connect(self.add_sm_image)
+      self.dlg.pushButton_10.clicked.connect(self.print_water_balance)
       self.dlg.comboBox.currentTextChanged.connect(self.get_districts)
       self.dlg.comboBox_2.currentTextChanged.connect(self.get_blocks)
       self.dlg.comboBox_3.currentTextChanged.connect(self.get_villages)
