@@ -4,9 +4,10 @@ import ee
 #import pandas as pd
 #import matplotlib.pyplot as plt
 #from matplotlib.figure import Figure
-#from matplotbib import axes
+#from matplotlib import axes
   
 import sys
+import time
 import json
 import inspect
 import qgis.core
@@ -66,7 +67,9 @@ class RuralWaterClass:
       self.layername = os.path.basename(self.filename).split(".")[0]
       print(self.layername)
       self.vlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
-      QgsProject.instance().addMapLayer(self.vlayer)
+      self.project.addMapLayer(self.vlayer)
+      #self.project.setCrs(self.crs)
+      #print("crs set to 3857")
       
       alayer = self.iface.activeLayer()
       single_symbol_renderer = alayer.renderer()
@@ -77,7 +80,8 @@ class RuralWaterClass:
       
     def get_states(self):
       print("called get States")
-      li = self.vlayer.uniqueValues(1)
+      idx = self.vlayer.fields().indexOf('State_N')
+      li = sorted(self.vlayer.uniqueValues(idx))
       if qgis.core.NULL in li:
           li.remove(qgis.core.NULL)
       self.dlg.comboBox.clear()
@@ -86,8 +90,9 @@ class RuralWaterClass:
     def get_districts(self):
       print("called get Districts")
       self.state = self.dlg.comboBox.currentText()
-      stateFilter = "\"State_N\"='" + self.state + "'"
-      expr = QgsExpression(stateFilter)
+      self.stateFilter = "\"State_N\"='" + self.state + "'"
+      self.vlayerFilter = self.stateFilter
+      expr = QgsExpression(self.vlayerFilter)
       stateFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
       print(stateFeas)
 
@@ -98,14 +103,16 @@ class RuralWaterClass:
         else:
           li.append(fea['Dist_N'])
 
+      li = sorted(set(li))
       self.dlg.comboBox_2.clear()
-      self.dlg.comboBox_2.addItems(set(li))
+      self.dlg.comboBox_2.addItems(li)
       
     def get_blocks(self):
       print("called get Block")
       self.dist = self.dlg.comboBox_2.currentText()
-      distFilter = "\"Dist_N\"='" + self.dist + "'"
-      expr = QgsExpression(distFilter)
+      self.distFilter = "\"Dist_N\"='" + self.dist + "'"
+      self.vlayerFilter = self.stateFilter + " and " + self.distFilter
+      expr = QgsExpression(self.vlayerFilter)
       distFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
       
       li = []
@@ -115,34 +122,48 @@ class RuralWaterClass:
         else:
           li.append(fea['SubDist_N'])
 
+      li = sorted(set(li))
       self.dlg.comboBox_3.clear()
-      self.dlg.comboBox_3.addItems(set(li))
+      self.dlg.comboBox_3.addItems(li)
       
     def get_villages(self):
       print("called get Villages")
       self.block = self.dlg.comboBox_3.currentText()
-      blockFilter = "\"SubDist_N\"='" + self.block + "'"
-      expr = QgsExpression(blockFilter)
+      self.blockFilter = "\"SubDist_N\"='" + self.block + "'"
+      self.vlayerFilter = self.stateFilter + " and " + self.distFilter + " and " + self.blockFilter
+      expr = QgsExpression(self.vlayerFilter)
       blockFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
       
       li = []
       for fea in blockFeas:
-        if (fea['VCT_Cd']==None):
+        if (fea['VCT_N']==None):
             li.append("BLANK")
         else:
-            li.append(str(fea['VCT_Cd']))
-            
+            li.append(str(fea['VCT_N']))
+      
+      li = sorted(set(li))      
       self.dlg.comboBox_4.clear()
-      self.dlg.comboBox_4.addItems(set(li))
+      self.dlg.comboBox_4.addItems(li)
     
+    def select_village(self):
+      self.vlg = self.dlg.comboBox_4.currentText()
+      self.vlgFilter = "\"VCT_N\"='"+self.vlg+"'"
+      self.vlayerFilter = self.stateFilter + " and " + self.distFilter + " and " + self.blockFilter + " and " + self.vlgFilter
+      print(self.vlayerFilter)
+      self.vlayer.selectByExpression(self.vlayerFilter)
+
+
     def zoom_village(self):
       print("called zoom to village")
-      self.vlg = self.dlg.comboBox_4.currentText()
-      vlgstring = "\"VCT_Cd\"='"+self.vlg+"'"
-      expr = QgsExpression(vlgstring)
-      vlgFea = self.vlayer.getFeatures(QgsFeatureRequest(expr))
-      self.vlayer.selectByExpression(vlgstring)
+      self.select_village()
+
+      self.iface.setActiveLayer(self.vlayer)
       self.iface.actionZoomToSelected().trigger()
+
+      # expr = QgsExpression(self.vlgFilter)
+      # vlgFea = self.vlayer.getFeatures(QgsFeatureRequest(expr))
+      # fea = QgsFeature()
+      # print(vlgFea.nextFeature(fea))
       
     ##########################################################################
     ##                       Water Balance Layers                           ##
@@ -318,7 +339,7 @@ class RuralWaterClass:
     ####      CALC WATER BALANCE VALUES      ####
     def calc_rain_value(self):
       try:
-        self.rain_value = str(self.rain.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        self.rain_value = str(round(self.rain.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])) + ' mm'
         print("rain value: ", self.rain_value)
       except:
         print(self.rain_year + " " + "rainfall image not found")
@@ -326,7 +347,7 @@ class RuralWaterClass:
 
     def calc_et_value(self):
       try:
-        self.et_value = str(self.et.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        self.et_value = str(round(self.et.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])) + ' mm'
         print("et value: ", self.et_value)
       except:
         print(self.et_year + " " + "et image not found")
@@ -334,7 +355,7 @@ class RuralWaterClass:
 
     def calc_sw_value(self):
       try:
-        self.sw_value = str(self.sw.reduceRegion(ee.Reducer.sum(),self.polygon,100).getInfo()['Volume'])
+        self.sw_value = str(round(self.sw.reduceRegion(ee.Reducer.sum(),self.polygon,100).getInfo()['Volume'])) + ' mm'
         print("sw value: ", self.sw_value)
       except:
         print(self.sw_year + " " + "surface water image not found")
@@ -342,7 +363,7 @@ class RuralWaterClass:
 
     def calc_gw_value(self):
       try:
-        self.gw_value = str(self.gw.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        self.gw_value = str(round(self.gw.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])) + ' mm'
         print("gw value: ", self.gw_value)
       except:
         print(self.gw_year + " " + "groundwater image not found")
@@ -350,11 +371,15 @@ class RuralWaterClass:
 
     def calc_sm_value(self):
       try:
-        self.sm_value = str(self.sm.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['susm'])
+        self.sm_value = str(round(self.sm.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['susm'])) + ' mm'
         print("sm value: ", self.sm_value)
       except:
         print(self.sm_year + " " + "soil moisture image not found")
         self.sm_value = "NA"
+
+    def calc_vill_area(self):
+      self.select_village()
+      vill = self.vlayer.getSelectedFeatures()
 
     def calc_water_balance(self):
       self.rain_year = self.et_year = self.gw_year = self.sw_year = self.sm_year = self.dlg.comboBox_6.currentText()
@@ -424,8 +449,8 @@ class RuralWaterClass:
       villname_label.setText(self.vlg)
 
       year_label = layout.itemById('year')
-      print("got year label from rainfall")
-      year_label.setText(self.dlg.comboBox_9.currentText())
+      print("got year label")
+      year_label.setText(self.dlg.comboBox_6.currentText())
 
       exporter = QgsLayoutExporter(layout)
       output_image = os.path.join(home_dir, 'Desktop', '{}.png'.format("water_budget"))
@@ -433,8 +458,14 @@ class RuralWaterClass:
       result = exporter.exportToImage(output_image, QgsLayoutExporter.ImageExportSettings())
       print(result)
 
+    def crsChanged(self):
+      print('CRS CHANGED')
+
     def run(self):
-      #imd_path = "https://storage.googleapis.com/imd-precipitation-historical-districts/IMD_Precipitation_TN_2004_2011.csv"
+      self.crs = qgis.core.QgsCoordinateReferenceSystem(3857, qgis.core.QgsCoordinateReferenceSystem.EpsgCrsId)
+      self.project = QgsProject.instance()
+      self.project.setCrs(self.crs)
+      print("crs set to 3857")
 
       self.dlg = RuralWaterDockWidget(
                   parent=self.iface.mainWindow(), iface=self.iface)
@@ -468,5 +499,6 @@ class RuralWaterClass:
       self.dlg.comboBox_2.currentTextChanged.connect(self.get_blocks)
       self.dlg.comboBox_3.currentTextChanged.connect(self.get_villages)
       self.dlg.comboBox_4.currentTextChanged.connect(self.zoom_village)
+      self.project.crsChanged.connect(self.crsChanged)
       #self.dlg.comboBox_6.currentTextChanged.connect(self.show_rain_stats)
       #self.dlg.pushButton_3.clicked.connect(self.show_rain_stats)
