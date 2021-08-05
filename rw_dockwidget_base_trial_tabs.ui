@@ -23,7 +23,7 @@
    <property name="maximumSize">
     <size>
      <width>550</width>
-     <height>16777215</height>
+     <height>850</height>
     </size>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -43,7 +43,7 @@
        <item>
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_aoi">
           <property name="toolTip">
@@ -463,6 +463,19 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QDialogButtonBox" name="buttonBox">
