@@ -5,13 +5,13 @@ import ee
 #import matplotlib.pyplot as plt
 #from matplotlib.figure import Figure
 #from matplotlib import axes
-  
+from pathlib import Path
 import sys
 import time
 import json
 import inspect
 import qgis.core
-from qgis.core import QgsProject,QgsLayout,QgsLayoutExporter,QgsReadWriteContext,QgsVectorLayer,QgsFeature,QgsFeatureRequest,QgsExpression
+from qgis.core import Qgis,QgsProject,QgsLayout,QgsLayoutExporter,QgsReadWriteContext,QgsVectorLayer,QgsFeature,QgsFeatureRequest,QgsExpression
 from qgis.gui import *
 
 from PyQt5.QtWidgets import QAction, QFileDialog, QDockWidget
@@ -63,13 +63,13 @@ class RuralWaterClass:
     def add_boundary_layer(self):
       print("called add_boundary_layer")
       self.filename = self.dlg.lineEdit.text()
-      print(self.filename)
+      if len(self.filename)==0:
+        self.iface.messageBar().pushMessage('Please select the correct shapefile', level=Qgis.Critical, duration=10)
+        return
       self.layername = os.path.basename(self.filename).split(".")[0]
       print(self.layername)
       self.vlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
       self.project.addMapLayer(self.vlayer)
-      #self.project.setCrs(self.crs)
-      #print("crs set to 3857")
       
       alayer = self.iface.activeLayer()
       single_symbol_renderer = alayer.renderer()
@@ -297,6 +297,8 @@ class RuralWaterClass:
       Map.addLayer(self.rain, rainViz, rain_label, True)
       self.rain = None
       self.rain_year = None
+      self.project.setCrs(self.crs)
+      print("crs set to 3857")
 
     def add_et_image(self):
       self.et_year = self.dlg.comboBox_11.currentText()
