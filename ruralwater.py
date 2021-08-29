@@ -14,7 +14,7 @@ import qgis.core
 from qgis.core import Qgis,QgsProject,QgsLayout,QgsLayoutExporter,QgsReadWriteContext,QgsVectorLayer,QgsFeature,QgsFeatureRequest,QgsExpression
 from qgis.gui import *
 
-from PyQt5.QtWidgets import QAction, QFileDialog, QDockWidget
+from PyQt5.QtWidgets import QAction, QFileDialog, QDockWidget,QMenu
 from PyQt5.QtGui import QIcon,QPixmap
 from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
 from PyQt5.QtXml import QDomDocument
@@ -38,15 +38,15 @@ class RuralWaterClass:
 
     def initGui(self):
       icon = os.path.join(os.path.join(cmd_folder, 'logo.png'))         # make path for logo image      
-      self.action = QAction(QIcon(icon), 'Rural Water', self.iface.mainWindow())    # create QAction
+      self.action = QAction(QIcon(icon), '&Jaltol', self.iface.mainWindow())    # create QAction
       self.action.triggered.connect(self.run)                           # if QAction triggered, run
-      self.iface.addPluginToMenu('&Rural Water>', self.action)       # add action to menu
-      self.iface.addToolBarIcon(self.action)                            # add action to tool bar 
+      self.iface.addPluginToMenu('&Jaltol', self.action)       # add action to menu
+      self.iface.addToolBarIcon(self.action)
       self.first_start = True
 
     def unload(self):
       self.iface.removeToolBarIcon(self.action)                         # remove action from tool bar
-      self.iface.removePluginMenu('&Rural Water', self.action)      # remove action from plugin menu
+      self.iface.removePluginMenu('&Jaltol', self.action)      # remove action from plugin menu
       del self.action
 
     ##########################################################################
