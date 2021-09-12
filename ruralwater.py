@@ -16,7 +16,7 @@ from qgis.gui import *
 
 from PyQt5.QtWidgets import QAction, QFileDialog, QDockWidget,QMenu
 from PyQt5.QtGui import QIcon,QPixmap
-from PyQt5.QtCore import Qt     #contains Qt.BrushStyle
+from PyQt5.QtCore import Qt,QSignalMapper     #contains Qt.BrushStyle
 from PyQt5.QtXml import QDomDocument
 
 from datetime import datetime
@@ -52,13 +52,38 @@ class RuralWaterClass:
     ##########################################################################
     ##                            AOI                                       ##
     ##########################################################################
+    
+    # def set_context(self,index):
+    #   # print("setting context for shapefile selection")
+    #   # self.fileiptextbox = self.dlg.lineEdit
+    #   print("type of signal mapper:",type(self.signalmapper))
+    #   if index==0:
+    #     print("index is 0")
+    #   elif index==1:
+    #     print("index is 1")
+    #   else:
+    #     pass
 
-    def select_output_file(self):
-      print("called select_output_file")
-      filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
-        self.dlg, "Select shape file ","", '*.shp')
-      self.dlg.lineEdit.setText(filename)
-      self.add_boundary_layer()
+    def select_output_file(self,index):
+      if index==0:
+        print("index is 0")
+        print("called select file for villages")
+        self.dlg.lineE = self.dlg.lineEdit
+        filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
+            self.dlg, "Select shape file ","", '*.shp')
+        self.dlg.lineE.setText(filename)
+        print("line Edit populated")
+        # self.add_boundary_layer()
+      if index==1:
+        print("index is 1")
+        print("called select file for watersheds")
+        self.dlg.lineE = self.dlg.lineEdit_2
+        filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
+            self.dlg, "Select shape file ","", '*.shp')
+        self.dlg.lineE.setText(filename)
+        print("line Edit populated")
+        # self.add_boundary_layer()
+
       
     def add_boundary_layer(self):
       print("called add_boundary_layer")
@@ -144,7 +169,7 @@ class RuralWaterClass:
       li = sorted(set(li))      
       self.dlg.comboBox_4.clear()
       self.dlg.comboBox_4.addItems(li)
-    
+
     def select_village(self):
       self.vlg = self.dlg.comboBox_4.currentText()
       self.vlgFilter = "\"VCT_N\"='"+self.vlg+"'"
@@ -160,10 +185,6 @@ class RuralWaterClass:
       self.iface.setActiveLayer(self.vlayer)
       self.iface.actionZoomToSelected().trigger()
 
-      # expr = QgsExpression(self.vlgFilter)
-      # vlgFea = self.vlayer.getFeatures(QgsFeatureRequest(expr))
-      # fea = QgsFeature()
-      # print(vlgFea.nextFeature(fea))
       
     ##########################################################################
     ##                       Water Balance Layers                           ##
@@ -489,7 +510,16 @@ class RuralWaterClass:
       self.populate_layer_list('surfacewater')
       self.populate_layer_list('wbyear')
       
-      self.dlg.pushButton.clicked.connect(self.select_output_file)      # Select shape file 
+      self.signalmapper = QSignalMapper()
+      self.signalmapper.mapped[int].connect(self.select_output_file)
+
+      self.dlg.pushButton.clicked.connect(self.signalmapper.map)
+      self.dlg.pushButton_4.clicked.connect(self.signalmapper.map)
+
+      self.signalmapper.setMapping(self.dlg.pushButton, 0)
+      self.signalmapper.setMapping(self.dlg.pushButton_4, 1)
+
+      #self.dlg.pushButton.clicked.connect(self.select_output_file)      # Select shape file 
       self.dlg.pushButton_2.clicked.connect(self.add_lulc_image)
       self.dlg.pushButton_3.clicked.connect(self.add_rain_image)
       self.dlg.pushButton_8.clicked.connect(self.add_et_image)
