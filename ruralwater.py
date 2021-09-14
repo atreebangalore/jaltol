@@ -11,7 +11,18 @@ import time
 import json
 import inspect
 import qgis.core
-from qgis.core import Qgis,QgsProject,QgsLayout,QgsLayoutExporter,QgsReadWriteContext,QgsVectorLayer,QgsFeature,QgsFeatureRequest,QgsExpression
+from qgis.core import (
+  Qgis,
+  QgsProject,
+  QgsLayout,
+  QgsLayoutExporter,
+  QgsReadWriteContext,
+  QgsVectorLayer,
+  QgsFeature,
+  QgsFeatureRequest,
+  QgsExpression,
+  QgsWkbTypes
+  )
 from qgis.gui import *
 
 from PyQt5.QtWidgets import QAction, QFileDialog, QDockWidget,QMenu
@@ -52,46 +63,45 @@ class RuralWaterClass:
     ##########################################################################
     ##                            AOI                                       ##
     ##########################################################################
-    
-    # def set_context(self,index):
-    #   # print("setting context for shapefile selection")
-    #   # self.fileiptextbox = self.dlg.lineEdit
-    #   print("type of signal mapper:",type(self.signalmapper))
-    #   if index==0:
-    #     print("index is 0")
-    #   elif index==1:
-    #     print("index is 1")
-    #   else:
-    #     pass
 
     def select_output_file(self,index):
       if index==0:
         print("index is 0")
         print("called select file for villages")
-        self.dlg.lineE = self.dlg.lineEdit
-        filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
-            self.dlg, "Select shape file ","", '*.shp')
-        self.dlg.lineE.setText(filename)
-        print("line Edit populated")
-        # self.add_boundary_layer()
-      if index==1:
+        self.dlg.lineE = self.dlg.lineEdit_aoi_selectVB
+      elif index==1:
         print("index is 1")
         print("called select file for watersheds")
-        self.dlg.lineE = self.dlg.lineEdit_2
-        filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
+        self.dlg.lineE = self.dlg.lineEdit_aoi_selectWB
+      elif index==2:
+        print("index is 2")
+        print("called select file for custom boundaries")
+        self.dlg.lineE = self.dlg.lineEdit_aoi_selectCB
+      else:
+        pass
+      filename, _filter = QFileDialog.getOpenFileName(                  # use file dialog to get filename 
             self.dlg, "Select shape file ","", '*.shp')
-        self.dlg.lineE.setText(filename)
-        print("line Edit populated")
-        # self.add_boundary_layer()
+      self.dlg.lineE.setText(filename)
+      print("line Edit populated")
+      #self.add_boundary_layer()
 
       
-    def add_boundary_layer(self):
+    def add_boundary_layer(self,index):
       print("called add_boundary_layer")
-      self.filename = self.dlg.lineEdit.text()
+      self.filename = self.dlg.lineE.text()
       if len(self.filename)==0:
         self.iface.messageBar().pushMessage('Please select the correct shapefile', level=Qgis.Critical, duration=10)
         return
-      self.layername = os.path.basename(self.filename).split(".")[0]
+
+      if index==0:
+        self.layername = 'Village Boundaries' #os.path.basename(self.filename).split(".")[0]
+      elif index==1:
+        self.layername = 'Watershed Boundaries'
+      elif index==2:
+        self.layername = 'Custom Boundaries'
+      else:
+        pass
+
       print(self.layername)
       self.vlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
       self.project.addMapLayer(self.vlayer)
@@ -101,7 +111,10 @@ class RuralWaterClass:
       symbol = single_symbol_renderer.symbol()
       symbol.symbolLayer(0).setBrushStyle(Qt.BrushStyle(Qt.NoBrush))
       
-      self.get_states()
+      if index==0:
+        self.get_states()
+      else:
+        pass
       
     def get_states(self):
       print("called get States")
@@ -109,12 +122,12 @@ class RuralWaterClass:
       li = sorted(self.vlayer.uniqueValues(idx))
       if qgis.core.NULL in li:
           li.remove(qgis.core.NULL)
-      self.dlg.comboBox.clear()
-      self.dlg.comboBox.addItems(li)
+      self.dlg.comboBox_aoi_selectS.clear()
+      self.dlg.comboBox_aoi_selectS.addItems(li)
 
     def get_districts(self):
       print("called get Districts")
-      self.state = self.dlg.comboBox.currentText()
+      self.state = self.dlg.comboBox_aoi_selectS.currentText()
       self.stateFilter = "\"State_N\"='" + self.state + "'"
       self.vlayerFilter = self.stateFilter
       expr = QgsExpression(self.vlayerFilter)
@@ -129,17 +142,18 @@ class RuralWaterClass:
           li.append(fea['Dist_N'])
 
       li = sorted(set(li))
-      self.dlg.comboBox_2.clear()
-      self.dlg.comboBox_2.addItems(li)
+      self.dlg.comboBox_aoi_selectD.clear()
+      self.dlg.comboBox_aoi_selectD.addItems(li)
       
     def get_blocks(self):
       print("called get Block")
-      self.dist = self.dlg.comboBox_2.currentText()
+      self.dist = self.dlg.comboBox_aoi_selectD.currentText()
+      print(self.dist)
       self.distFilter = "\"Dist_N\"='" + self.dist + "'"
       self.vlayerFilter = self.stateFilter + " and " + self.distFilter
       expr = QgsExpression(self.vlayerFilter)
       distFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
-      
+
       li = []
       for fea in distFeas:
         if (fea['SubDist_N']==None):
@@ -148,12 +162,14 @@ class RuralWaterClass:
           li.append(fea['SubDist_N'])
 
       li = sorted(set(li))
-      self.dlg.comboBox_3.clear()
-      self.dlg.comboBox_3.addItems(li)
+      print("no of blocks:",len(li))
+
+      self.dlg.comboBox_aoi_selectB.clear()
+      self.dlg.comboBox_aoi_selectB.addItems(li)
       
     def get_villages(self):
       print("called get Villages")
-      self.block = self.dlg.comboBox_3.currentText()
+      self.block = self.dlg.comboBox_aoi_selectB.currentText()
       self.blockFilter = "\"SubDist_N\"='" + self.block + "'"
       self.vlayerFilter = self.stateFilter + " and " + self.distFilter + " and " + self.blockFilter
       expr = QgsExpression(self.vlayerFilter)
@@ -167,11 +183,11 @@ class RuralWaterClass:
             li.append(str(fea['VCT_N']))
       
       li = sorted(set(li))      
-      self.dlg.comboBox_4.clear()
-      self.dlg.comboBox_4.addItems(li)
+      self.dlg.comboBox_aoi_selectV.clear()
+      self.dlg.comboBox_aoi_selectV.addItems(li)
 
     def select_village(self):
-      self.vlg = self.dlg.comboBox_4.currentText()
+      self.vlg = self.dlg.comboBox_aoi_selectV.currentText()
       self.vlgFilter = "\"VCT_N\"='"+self.vlg+"'"
       self.vlayerFilter = self.stateFilter + " and " + self.distFilter + " and " + self.blockFilter + " and " + self.vlgFilter
       print(self.vlayerFilter)
@@ -419,8 +435,9 @@ class RuralWaterClass:
 
 
     def print_water_balance(self):
-      geometry = json.loads(self.vlayer.selectedFeatures()[0].geometry().asJson())
-      #print(geometry)
+      geometry = json.loads(self.iface.activeLayer().selectedFeatures()[0].geometry().coerceToType(QgsWkbTypes.MultiPolygon)[0].asJson())
+      print(self.iface.activeLayer(),"\n")
+      print(geometry['coordinates'])
       self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'])
       #print(self.polygon)
 
@@ -469,8 +486,18 @@ class RuralWaterClass:
 
       villname_label = layout.itemById('villname')
       print("got villname label")
-      villname_label.setText(self.vlg)
 
+      self.activelayername = self.iface.activeLayer().name()
+
+      if ('Village' in self.activelayername):
+        villname_label.setText(self.vlg)
+      elif ('Watershed' in self.activelayername):
+        villname_label.setText('Watershed')
+      elif ('Custom' in self.activelayername):
+        villname_label.setText('Custom')
+      else:
+        pass
+      
       year_label = layout.itemById('year')
       print("got year label")
       year_label.setText(self.dlg.comboBox_6.currentText())
@@ -494,7 +521,7 @@ class RuralWaterClass:
                   parent=self.iface.mainWindow(), iface=self.iface)
       logo_rect = QPixmap(os.path.join(cmd_folder,"resources","atree_logo_rect.png"))
 
-      self.dlg.label_7.setPixmap(logo_rect)
+      self.dlg.label_plugin_logo.setPixmap(logo_rect)
 
       self.dlg.show()
       
@@ -510,14 +537,29 @@ class RuralWaterClass:
       self.populate_layer_list('surfacewater')
       self.populate_layer_list('wbyear')
       
-      self.signalmapper = QSignalMapper()
-      self.signalmapper.mapped[int].connect(self.select_output_file)
+      #####     SIGNAL MAPPER for AOI SELECTION    #####
+      self.signalmapperSOF = QSignalMapper()
+      self.signalmapperSOF.mapped[int].connect(self.select_output_file)
 
-      self.dlg.pushButton.clicked.connect(self.signalmapper.map)
-      self.dlg.pushButton_4.clicked.connect(self.signalmapper.map)
+      self.dlg.pushButton_aoi_selectVB.clicked.connect(self.signalmapperSOF.map)
+      self.dlg.pushButton_aoi_selectWB.clicked.connect(self.signalmapperSOF.map)
+      self.dlg.pushButton_aoi_selectCB.clicked.connect(self.signalmapperSOF.map)
 
-      self.signalmapper.setMapping(self.dlg.pushButton, 0)
-      self.signalmapper.setMapping(self.dlg.pushButton_4, 1)
+      self.signalmapperSOF.setMapping(self.dlg.pushButton_aoi_selectVB, 0)
+      self.signalmapperSOF.setMapping(self.dlg.pushButton_aoi_selectWB, 1)
+      self.signalmapperSOF.setMapping(self.dlg.pushButton_aoi_selectCB, 2)
+
+      #####     SIGNAL MAPPER for BOUNDARY ADDITION    #####
+      self.signalmapperABL = QSignalMapper()
+      self.signalmapperABL.mapped[int].connect(self.add_boundary_layer)
+
+      self.dlg.lineEdit_aoi_selectVB.textChanged.connect(self.signalmapperABL.map)
+      self.dlg.lineEdit_aoi_selectWB.textChanged.connect(self.signalmapperABL.map)
+      self.dlg.lineEdit_aoi_selectCB.textChanged.connect(self.signalmapperABL.map)
+
+      self.signalmapperABL.setMapping(self.dlg.lineEdit_aoi_selectVB, 0)
+      self.signalmapperABL.setMapping(self.dlg.lineEdit_aoi_selectWB, 1)
+      self.signalmapperABL.setMapping(self.dlg.lineEdit_aoi_selectCB, 2)
 
       #self.dlg.pushButton.clicked.connect(self.select_output_file)      # Select shape file 
       self.dlg.pushButton_2.clicked.connect(self.add_lulc_image)
@@ -527,10 +569,10 @@ class RuralWaterClass:
       self.dlg.pushButton_7.clicked.connect(self.add_gw_image)
       self.dlg.pushButton_9.clicked.connect(self.add_sm_image)
       self.dlg.pushButton_10.clicked.connect(self.print_water_balance)
-      self.dlg.comboBox.currentTextChanged.connect(self.get_districts)
-      self.dlg.comboBox_2.currentTextChanged.connect(self.get_blocks)
-      self.dlg.comboBox_3.currentTextChanged.connect(self.get_villages)
-      self.dlg.comboBox_4.currentTextChanged.connect(self.zoom_village)
+      self.dlg.comboBox_aoi_selectS.currentTextChanged.connect(self.get_districts)
+      self.dlg.comboBox_aoi_selectD.currentTextChanged.connect(self.get_blocks)
+      self.dlg.comboBox_aoi_selectB.currentTextChanged.connect(self.get_villages)
+      self.dlg.comboBox_aoi_selectV.currentTextChanged.connect(self.zoom_village)
       self.project.crsChanged.connect(self.crsChanged)
       #self.dlg.comboBox_6.currentTextChanged.connect(self.show_rain_stats)
       #self.dlg.pushButton_3.clicked.connect(self.show_rain_stats)
