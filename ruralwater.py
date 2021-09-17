@@ -94,7 +94,8 @@ class RuralWaterClass:
         return
 
       if index==0:
-        self.layername = 'Village Boundaries' #os.path.basename(self.filename).split(".")[0]
+        self.layername = 'Village Boundaries'
+        self.vlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
       elif index==1:
         self.layername = 'Watershed Boundaries'
       elif index==2:
@@ -102,9 +103,9 @@ class RuralWaterClass:
       else:
         pass
 
-      print(self.layername)
-      self.vlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
-      self.project.addMapLayer(self.vlayer)
+      print("layer name: ", self.layername)
+      self.newlayer = QgsVectorLayer(self.filename, self.layername, "ogr")
+      self.project.addMapLayer(self.newlayer)
       
       alayer = self.iface.activeLayer()
       single_symbol_renderer = alayer.renderer()
@@ -130,6 +131,7 @@ class RuralWaterClass:
       self.state = self.dlg.comboBox_aoi_selectS.currentText()
       self.stateFilter = "\"State_N\"='" + self.state + "'"
       self.vlayerFilter = self.stateFilter
+      #print(self.vlayerFilter)
       expr = QgsExpression(self.vlayerFilter)
       stateFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
       print(stateFeas)
@@ -148,9 +150,10 @@ class RuralWaterClass:
     def get_blocks(self):
       print("called get Block")
       self.dist = self.dlg.comboBox_aoi_selectD.currentText()
-      print(self.dist)
+      print("of district: ",self.dist)
       self.distFilter = "\"Dist_N\"='" + self.dist + "'"
       self.vlayerFilter = self.stateFilter + " and " + self.distFilter
+      #print(self.vlayerFilter)
       expr = QgsExpression(self.vlayerFilter)
       distFeas = self.vlayer.getFeatures(QgsFeatureRequest(expr))
 
@@ -187,19 +190,25 @@ class RuralWaterClass:
       self.dlg.comboBox_aoi_selectV.addItems(li)
 
     def select_village(self):
+      print("called select village")
       self.vlg = self.dlg.comboBox_aoi_selectV.currentText()
       self.vlgFilter = "\"VCT_N\"='"+self.vlg+"'"
       self.vlayerFilter = self.stateFilter + " and " + self.distFilter + " and " + self.blockFilter + " and " + self.vlgFilter
+      self.vlayerFilter = self.vlayerFilter  # "\""+ self.vlayerFilter.replace("\"","\\\"") +"\""
       print(self.vlayerFilter)
-      self.vlayer.selectByExpression(self.vlayerFilter)
+      print(self.iface.activeLayer())
+      # expr = QgsExpression(self.vlayerFilter)
+      #print("is expression valid: ",checkExpression(expr))
+      self.iface.activeLayer().selectByExpression(self.vlayerFilter)
 
 
     def zoom_village(self):
       print("called zoom to village")
       self.select_village()
-
-      self.iface.setActiveLayer(self.vlayer)
+      print(self.iface.setActiveLayer(self.vlayer))
+      print(self.vlayer, self.iface.activeLayer())
       self.iface.actionZoomToSelected().trigger()
+      print("zoom to Village triggered","\n")
 
       
     ##########################################################################
