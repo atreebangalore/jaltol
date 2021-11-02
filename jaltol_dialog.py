@@ -6,7 +6,7 @@ from PyQt5 import uic
 from PyQt5 import QtWidgets
 
 WIDGET,BASE = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'rw_dockwidget_base_trial_tabs.ui'), resource_suffix='')
+    os.path.dirname(__file__), 'jaltol_dockwidget_base_trial_tabs.ui'), resource_suffix='')
 
 
 class JaltolDockWidget(BASE, WIDGET):
