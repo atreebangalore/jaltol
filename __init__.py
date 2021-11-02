@@ -1,4 +1,4 @@
-from .ruralwater import RuralWaterClass
+from .jaltol import JaltolClass
 
 def classFactory(iface):
-    return RuralWaterClass(iface)
+    return JaltolClass(iface)

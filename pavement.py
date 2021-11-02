@@ -19,7 +19,7 @@ def get_extlibs():
 
 options(
     plugin=Bunch(
-        name='ruralwater',
+        name='jaltol',
         ext_libs=path(get_extlibs()),
         source_dir=path('.'),    # current directory hosts source
         package_dir=path('.'),   # packages to go in current directory
@@ -32,7 +32,7 @@ options(
             ".travis.yml",
             "__pycache__",
             "media",
-            "ruralwater.zip"
+            "jaltol.zip"
         ]
     ),
 )
@@ -117,5 +117,5 @@ def make_zip(zipFile, options):
     for root, dirs, files in os.walk(src_dir):
         for f in filter_excludes(files):
             relpath = os.path.relpath(root, '.')
-            zipFile.write(path(root) / f, path('ruralwater') / path(relpath) / f)
+            zipFile.write(path(root) / f, path('jaltol') / path(relpath) / f)
         filter_excludes(dirs)

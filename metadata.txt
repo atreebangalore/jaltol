@@ -1,7 +1,7 @@
 [general]
 name= Jaltol
 description=a QGIS python plugin to make water budgets for villages/watersheds in rural India. These plans help lead the user from data to decisions
-version=0.2
+version=1.0
 qgisMinimumVersion=3.8
-author=Ashoka Trust for Ecology & Environment (ATREE) , Craig Dsouza
-email=craigds022@gmail.com
+author=Ashoka Trust for Ecology & Environment (ATREE)
+email=jaltol@atree.org

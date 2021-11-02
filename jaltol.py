@@ -32,7 +32,7 @@ from PyQt5.QtCore import Qt,QSignalMapper     #contains Qt.BrushStyle
 from PyQt5.QtXml import QDomDocument
 
 from datetime import datetime
-from .ruralwater_dialog import RuralWaterDockWidget
+from .jaltol_dialog import JaltolDockWidget
 import ee
 from ee_plugin import Map
 #from vectors import getLocalBoundaries
@@ -44,7 +44,7 @@ inspect_getfile = inspect.getfile(inspect.currentframe())
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 home_dir = os.path.join(os.path.expanduser('~'))
 
-class RuralWaterClass:
+class JaltolClass:
     def __init__(self, iface):                                          # give plugin class access to QgisInterface
         self.iface = iface
 
@@ -546,7 +546,7 @@ class RuralWaterClass:
       self.project.setCrs(self.crs)
       print("crs set to 3857")
 
-      self.dlg = RuralWaterDockWidget(
+      self.dlg = JaltolDockWidget(
                   parent=self.iface.mainWindow(), iface=self.iface)
       logo_rect = QPixmap(os.path.join(cmd_folder,"resources","atree_logo_rect.png"))
 

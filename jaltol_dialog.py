@@ -9,7 +9,7 @@ WIDGET,BASE = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'rw_dockwidget_base_trial_tabs.ui'), resource_suffix='')
 
 
-class RuralWaterDockWidget(BASE, WIDGET):
+class JaltolDockWidget(BASE, WIDGET):
     def __init__(self, parent=None, iface=None):
-        super(RuralWaterDockWidget, self).__init__(parent)
+        super(JaltolDockWidget, self).__init__(parent)
         self.setupUi(self)
