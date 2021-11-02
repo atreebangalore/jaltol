@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 import time
 import json
+import math
 import inspect
 import qgis.core
 from qgis.core import (
@@ -403,7 +404,12 @@ class RuralWaterClass:
 
     def calc_sw_value(self):
       try:
-        self.sw_value = str(round(self.sw.reduceRegion(ee.Reducer.sum(),self.polygon,100).getInfo()['Volume'])) + ' mm'
+        self.sw_vol_value = self.sw.reduceRegion(ee.Reducer.sum(),self.polygon).getInfo()['Volume']
+        print("sw volume (in m3): ",self.sw_vol_value,type(self.sw_vol_value))
+        
+        self.sw_value_in_mm = self.sw_vol_value / self.polygon_area * 1000
+
+        self.sw_value = str(round(self.sw_value_in_mm)) + ' mm'
         print("sw value: ", self.sw_value)
       except:
         print(self.sw_year + " " + "surface water image not found")
@@ -444,12 +450,26 @@ class RuralWaterClass:
 
 
     def print_water_balance(self):
-      geometry = json.loads(self.iface.activeLayer().selectedFeatures()[0].geometry().coerceToType(QgsWkbTypes.MultiPolygon)[0].asJson())
-      print(self.iface.activeLayer(),"\n")
-      print(geometry['coordinates'])
-      self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'])
-      #print(self.polygon)
+      self.alayer_crs = self.iface.activeLayer().crs().postgisSrid() #get EPSG code as integer
+      self.alayer_eeproj = ee.Projection('EPSG:'+ str(self.alayer_crs))
+      eeproj_wgs84 = ee.Projection('EPSG:4326')
 
+      # get just the geom (which may be Multipolygon or MultipolygonZ)
+      self.geom_SelFea_1 = self.iface.activeLayer().selectedFeatures()[0].geometry()  
+
+      # convert geom to JSON format
+      geometry = json.loads(self.geom_SelFea_1.coerceToType(QgsWkbTypes.MultiPolygon)[0].asJson())
+
+      print(self.iface.activeLayer(),"\n","EPSG Code: ",self.alayer_crs)
+      #print(geometry['coordinates'][0][0][0:5])
+
+      # make polygon with coords, and reproject to WGS 84, params are important as specified
+      self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=True,maxError=0.1,evenOdd=False) #.transform(eeproj_wgs84) #maxError=1,evenOdd=False
+      self.polygon_area = (self.geom_SelFea_1.area())
+      # self.polygon_coords = self.polygon.coordinates().getInfo()
+      # print(self.polygon_coords[0][0][0])
+
+      print("area of polygon (in m2): ",self.polygon_area)
       self.calc_water_balance()
 
       project = QgsProject.instance()
