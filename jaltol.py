@@ -465,7 +465,11 @@ class JaltolClass:
 
       # make polygon with coords, and reproject to WGS 84, params are important as specified
       self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=True,maxError=0.1,evenOdd=False) #.transform(eeproj_wgs84) #maxError=1,evenOdd=False
-      self.polygon_area = (self.geom_SelFea_1.area())
+      
+      if self.alayer_crs == 4326:
+        self.polygon_area = float(self.polygon.area().getInfo())
+      else:
+        self.polygon_area = (self.geom_SelFea_1.area())
       # self.polygon_coords = self.polygon.coordinates().getInfo()
       # print(self.polygon_coords[0][0][0])
 
@@ -548,8 +552,9 @@ class JaltolClass:
 
       self.dlg = JaltolDockWidget(
                   parent=self.iface.mainWindow(), iface=self.iface)
-      logo_rect = QPixmap(os.path.join(cmd_folder,"resources","atree_logo_rect.png"))
 
+      # Uncomment this to set a custom rect logo 
+      logo_rect = QPixmap(os.path.join(cmd_folder,"resources","jaltol_logo_blue_rect.png"))
       self.dlg.label_plugin_logo.setPixmap(logo_rect)
 
       self.dlg.show()
