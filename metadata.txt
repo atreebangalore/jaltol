@@ -1,7 +1,12 @@
 [general]
 name= Jaltol
-description=a QGIS python plugin to make water balances for villages/watersheds in rural India. These plans help lead the user from data to decisions
+description=a QGIS python plugin to make water balances for villages/watersheds in rural India. These plans help lead the user from data to decisions.  
+about=Jaltol uses Google Earth Engine in the background and therefore users need a Google Earth Engine account, signup for this here , https://signup.earthengine.google.com/ . P.S. The QGIS 'Google Earth Engine' Plugin must also be installed prior to installing Jaltol, see more about this plugin here https://gee-community.github.io/qgis-earthengine-plugin/ 
 version=1.0
 qgisMinimumVersion=3.8
+tags=water,water-balance,google-earth-engine
+repository=https://github.com/atreebangalore/jaltol
+tracker=https://github.com/atreebangalore/jaltol/issues
+experimental=False
 author=Ashoka Trust for Ecology & Environment (ATREE)
 email=jaltol@atree.org
