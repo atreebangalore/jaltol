@@ -7,6 +7,7 @@ qgisMinimumVersion=3.8
 tags=water,water-balance,google-earth-engine
 repository=https://github.com/atreebangalore/jaltol
 tracker=https://github.com/atreebangalore/jaltol/issues
+homepage=https://medium.com/centre-for-social-and-environmental-innovation
 experimental=False
 author=Ashoka Trust for Ecology & Environment (ATREE)
 email=jaltol@atree.org
