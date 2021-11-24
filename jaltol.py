@@ -437,6 +437,8 @@ class JaltolClass:
 
     def calc_water_balance(self):
       self.rain_year = self.et_year = self.gw_year = self.sw_year = self.sm_year = self.dlg.comboBox_6.currentText()
+      self.wb_year = self.dlg.comboBox_6.currentText()
+      self.wb_next_year = str(int(self.wb_year) + 1)[2:]
       self.make_rain_image()
       self.calc_rain_value()
       self.make_et_image()
@@ -482,7 +484,7 @@ class JaltolClass:
       print("layout initialized")
       layout.initializeDefaults()
 
-      template = os.path.join(cmd_folder,"resources","water_balance.qpt")
+      template = os.path.join(cmd_folder,"resources","water_balance_2021_11_24.qpt")
       print(type(template))
 
       with open(template) as f:
@@ -517,23 +519,27 @@ class JaltolClass:
       print("got soilmoisture label")
       sm_label.setText(self.sm_value)
 
-      villname_label = layout.itemById('villname')
-      print("got villname label")
+      areaname_label = layout.itemById('areaname')
+      print("got areaname label")
+
+      area_label = layout.itemById('area')
+      print("got area label")
 
       self.activelayername = self.iface.activeLayer().name()
 
       if ('Village' in self.activelayername):
-        villname_label.setText(self.vlg)
+        area_label.setText('Village')
+        areaname_label.setText(self.vlg)
       elif ('Watershed' in self.activelayername):
-        villname_label.setText('Watershed')
+        area_label.setText('Watershed')
       elif ('Custom' in self.activelayername):
-        villname_label.setText('Custom')
+        area_label.setText('Custom')
       else:
         pass
       
       year_label = layout.itemById('year')
       print("got year label")
-      year_label.setText(self.dlg.comboBox_6.currentText())
+      year_label.setText(f"{self.wb_year}-{self.wb_next_year}")
 
       exporter = QgsLayoutExporter(layout)
       output_image = os.path.join(home_dir, 'Desktop', '{}.png'.format("water_budget"))
