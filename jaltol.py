@@ -388,19 +388,23 @@ class JaltolClass:
     ####      CALC WATER BALANCE VALUES      ####
     def calc_rain_value(self):
       try:
-        self.rain_value = str(round(self.rain.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])) + ' mm'
-        print("rain value: ", self.rain_value)
+        self.rain_value = round(self.rain.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        self.rain_str = str(self.rain_value) + ' mm'
+        print("rain value(mod): ", self.rain_str)
       except:
         print(self.rain_year + " " + "rainfall image not found")
-        self.rain_value = "NA"
+        self.rain_value = math.nan
+        self.rain_str = "NA"
 
     def calc_et_value(self):
       try:
-        self.et_value = str(round(self.et.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])) + ' mm'
-        print("et value: ", self.et_value)
+        self.et_value = round(self.et.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        self.et_str = str(self.et_value) + ' mm'
+        print("et value: ", self.et_str)
       except:
         print(self.et_year + " " + "et image not found")
-        self.et_value = "NA"
+        self.et_value = math.nan
+        self.et_str = "NA"
 
     def calc_sw_value(self):
       try:
@@ -409,27 +413,46 @@ class JaltolClass:
         
         self.sw_value_in_mm = self.sw_vol_value / self.polygon_area * 1000
 
-        self.sw_value = str(round(self.sw_value_in_mm)) + ' mm'
-        print("sw value: ", self.sw_value)
+        self.sw_str = str(round(self.sw_value_in_mm)) + ' mm'
+        print("sw value: ", self.sw_str)
       except:
         print(self.sw_year + " " + "surface water image not found")
-        self.sw_value = "NA"
+        self.sw_value_in_mm = math.nan
+        self.sw_str = "NA"
 
     def calc_gw_value(self):
       try:
-        self.gw_value = str(round(self.gw.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])) + ' mm'
-        print("gw value: ", self.gw_value)
+        self.gw_value = round(self.gw.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
+        self.gw_str = str(self.gw_value) + ' mm'
+        print("gw value: ", self.gw_str)
       except:
         print(self.gw_year + " " + "groundwater image not found")
-        self.gw_value = "NA"
+        self.gw_value = math.nan
+        self.gw_str = "NA"
 
     def calc_sm_value(self):
       try:
-        self.sm_value = str(round(self.sm.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['susm'])) + ' mm'
-        print("sm value: ", self.sm_value)
+        self.sm_value = round(self.sm.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['susm'])
+        self.sm_str = str(self.sm_value) + ' mm'
+        print("sm value: ", self.sm_str)
       except:
         print(self.sm_year + " " + "soil moisture image not found")
-        self.sm_value = "NA"
+        self.sm_value = math.nan
+        self.sm_str = "NA"
+
+    def calc_ro_value(self):
+      rhs = [self.et_value,self.sm_value,self.gw_value,self.sw_value_in_mm]
+      rhsnonan = [x for x in rhs if math.isnan(x) == False]
+      rhssum = sum(rhsnonan)
+      print(f"sum of outputs is {rhssum}")
+
+      if self.rain_value >= rhssum:
+        self.ro_value = round(self.rain_value - rhssum)
+        self.ro_str = str(self.ro_value) + ' mm'
+        print("ro value: ",self.ro_str)
+      else:
+        self.ro_value = 0
+        self.ro_str = "0 mm"
 
     def calc_vill_area(self):
       self.select_village()
@@ -449,6 +472,7 @@ class JaltolClass:
       self.calc_gw_value()
       self.make_sm_image()
       self.calc_sm_value()
+      self.calc_ro_value()
 
 
     def print_water_balance(self):
@@ -501,23 +525,27 @@ class JaltolClass:
 
       rain_label = layout.itemById('precipitation')
       print("got rainfall label")
-      rain_label.setText(self.rain_value)
+      rain_label.setText(self.rain_str)
 
       et_label = layout.itemById('evapotranspiration')
       print("got evapotranspiration label")
-      et_label.setText(self.et_value)
+      et_label.setText(self.et_str)
 
       sw_label = layout.itemById('surfacewater')
       print("got surfacewater label")
-      sw_label.setText(self.sw_value)
+      sw_label.setText(self.sw_str)
 
       gw_label = layout.itemById('groundwater')
       print("got groundwater label")
-      gw_label.setText(self.gw_value)
+      gw_label.setText(self.gw_str)
 
       sm_label = layout.itemById('soilmoisture')
       print("got soilmoisture label")
-      sm_label.setText(self.sm_value)
+      sm_label.setText(self.sm_str)
+
+      ro_label = layout.itemById('runoff')
+      print("got runoff label")
+      ro_label.setText(self.ro_str)
 
       areaname_label = layout.itemById('areaname')
       print("got areaname label")
