@@ -10,6 +10,12 @@
     <height>853</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>480</width>
@@ -129,7 +135,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;In this first iteration of Jaltol, the tool allows a user to &lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1) view multiple data layers for different components of the water cycle, including rainfall, evapotranspiration, soil moisture, groundwater storage and surface water storage&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2) compute a water balance for an area of interest with shapefiles that could represent watersheds, villages, or any other administrative boundary.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Further details on data layers within the tool and it's usage is available in the Training Manual, link &lt;a href=&quot;https://docs.google.com/document/d/1R8w4TyCb0Q9bj1daLvxvJ7SuMVmxPPm-j3M2bEvnRTQ/edit?usp=sharing&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can find the Training Manual for the plugin &lt;a href=&quot;https://drive.google.com/drive/folders/1mfUSpFMXx-7eTD_5JpxG5aAtrCStb3Fv?usp=sharing&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;here.&lt;/span&gt;&lt;/a&gt; Sample village and watershed boundary files for the plugin can be found &lt;a href=&quot;https://www.dropbox.com/sh/wzje73zlvgv2mwp/AACzzGQUfrnXXiIHLuJJnul2a?dl=0&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you would like to contribute to the development of Jaltol or if you have general issues/feedback you may write to us at jaltol@atree.org&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>

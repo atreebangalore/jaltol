@@ -570,10 +570,16 @@ class JaltolClass:
       year_label.setText(f"{self.wb_year}-{self.wb_next_year}")
 
       exporter = QgsLayoutExporter(layout)
-      output_image = os.path.join(home_dir, 'Desktop', '{}.png'.format("water_budget"))
+      output_image = os.path.join(home_dir, 'Desktop', '{}.png'.format("water_balance"))
       print(output_image)
       result = exporter.exportToImage(output_image, QgsLayoutExporter.ImageExportSettings())
       print(result)
+
+      if (result==0):
+        self.iface.messageBar().pushMessage('Water Balance image saved to desktop', level=Qgis.Info, duration=10)
+      else:
+        self.iface.messageBar().pushMessage(f"Failed to save Water Balance image to desktop, error code is {result}", level=Qgis.Critical,duration=10)
+
 
     def crsChanged(self):
       print('CRS CHANGED')
