@@ -490,7 +490,7 @@ class JaltolClass:
       #print(geometry['coordinates'][0][0][0:5])
 
       # make polygon with coords, and reproject to WGS 84, params are important as specified
-      self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=True,maxError=0.1,evenOdd=False) #.transform(eeproj_wgs84) #maxError=1,evenOdd=False
+      self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=True,maxError=0.1,evenOdd=True) #.transform(eeproj_wgs84) #maxError=1,evenOdd=False
       
       if self.alayer_crs == 4326:
         self.polygon_area = float(self.polygon.area().getInfo())
