@@ -11,7 +11,7 @@ assignees: ''
 One line description of what the bug is.
 
 **To Reproduce**
-If using a custom shapefile please attach the zip file of the same with this issue.
+If using a custom shapefile please upload ZIP of the same to project google drive folder GISLayers and add link below.
 Steps to reproduce the behavior:
 1. 
 2. 
