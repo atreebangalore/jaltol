@@ -300,11 +300,12 @@ class JaltolClass:
       print(type(self.gw_year),self.gw_year)
       rcstr = 'users/cseicomms/groundwater/recharge/' + self.gw_year
       dcstr = 'users/cseicomms/groundwater/discharge/' + self.gw_year
+      systr = 'users/cseicomms/groundwater/sy_mean_cgwb'
       rc = ee.Image(rcstr)
       dc = ee.Image(dcstr)
-      print(rcstr,dcstr)
-      sy = 0.01
-      self.gw = rc.subtract(dc).multiply(1000).multiply(sy)
+      self.sy = ee.Image(systr).divide(100)
+      print(rcstr,dcstr,systr)
+      self.gw = rc.subtract(dc).multiply(1000).multiply(self.sy)
       print(type(self.gw))
 
     def make_sm_image(self):
@@ -462,8 +463,8 @@ class JaltolClass:
       self.rain_year = self.et_year = self.gw_year = self.sw_year = self.sm_year = self.dlg.comboBox_6.currentText()
       self.wb_year = self.dlg.comboBox_6.currentText()
       self.wb_next_year = str(int(self.wb_year) + 1)[2:]
-      self.make_rain_image()
-      self.calc_rain_value()
+      self.make_rain_image()  
+      self.calc_rain_value()    # change 'calc' to 'reduce'
       self.make_et_image()
       self.calc_et_value()
       self.make_sw_image()

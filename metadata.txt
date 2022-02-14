@@ -5,7 +5,7 @@ about=Jaltol uses Google Earth Engine in the background and therefore users need
       P.S. The QGIS 'Google Earth Engine' Plugin must also be installed prior to installing Jaltol, see more about this plugin <a href="https://gee-community.github.io/qgis-earthengine-plugin/">here</a>
       You can find the Training Manual for the plugin <a href="https://drive.google.com/drive/folders/1mfUSpFMXx-7eTD_5JpxG5aAtrCStb3Fv?usp=sharing">here</a>.
       Sample village and watershed boundary files for the plugin can be found <a href="https://www.dropbox.com/sh/wzje73zlvgv2mwp/AACzzGQUfrnXXiIHLuJJnul2a?dl=0">here</a>
-version=1.0.2
+version=1.1
 qgisMinimumVersion=3.8
 tags=water,water-balance,google-earth-engine
 repository=https://github.com/atreebangalore/jaltol
