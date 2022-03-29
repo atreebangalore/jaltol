@@ -308,6 +308,17 @@ class JaltolClass:
       self.gw = rc.subtract(dc).multiply(1000).multiply(self.sy)
       print(type(self.gw))
 
+      # new code
+      # y1str = 'users/cseicomms/groundwater/may_' + self.gw_year
+      # y2str = 'users/cseicomms/groundwater/may_' + str(int(self.gw_year) + 1)
+      # systr = 'users/cseicomms/groundwater/sy_mean_cgwb'
+      # year1 = ee.Image(y1str)
+      # year2 = ee.Image(y2str)
+      # self.sy = ee.Image(systr).divide(100)
+      # print(y1str,y2str,systr)
+      # self.gw = year1.subtract(year2).multiply(100).multiply(self.sy)
+      # print(type(self.gw))  
+
     def make_sm_image(self):
       smColl = ee.ImageCollection("NASA_USDA/HSL/SMAP10KM_soil_moisture");
       print(type(self.sm_year),self.sm_year)
@@ -392,7 +403,8 @@ class JaltolClass:
         self.rain_value = round(self.rain.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
         self.rain_str = str(self.rain_value) + ' mm'
         print("rain value(mod): ", self.rain_str)
-      except:
+      except Exception as e:
+        print(e)
         print(self.rain_year + " " + "rainfall image not found")
         self.rain_value = math.nan
         self.rain_str = "NA"
@@ -402,7 +414,8 @@ class JaltolClass:
         self.et_value = round(self.et.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
         self.et_str = str(self.et_value) + ' mm'
         print("et value: ", self.et_str)
-      except:
+      except Exception as e:
+        print(e)
         print(self.et_year + " " + "et image not found")
         self.et_value = math.nan
         self.et_str = "NA"
@@ -416,7 +429,8 @@ class JaltolClass:
 
         self.sw_str = str(round(self.sw_value_in_mm)) + ' mm'
         print("sw value: ", self.sw_str)
-      except:
+      except Exception as e:
+        print(e)
         print(self.sw_year + " " + "surface water image not found")
         self.sw_value_in_mm = math.nan
         self.sw_str = "NA"
@@ -426,7 +440,8 @@ class JaltolClass:
         self.gw_value = round(self.gw.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['b1'])
         self.gw_str = str(self.gw_value) + ' mm'
         print("gw value: ", self.gw_str)
-      except:
+      except Exception as e:
+        print(e)
         print(self.gw_year + " " + "groundwater image not found")
         self.gw_value = math.nan
         self.gw_str = "NA"
@@ -436,7 +451,8 @@ class JaltolClass:
         self.sm_value = round(self.sm.reduceRegion(ee.Reducer.median(),self.polygon,100).getInfo()['susm'])
         self.sm_str = str(self.sm_value) + ' mm'
         print("sm value: ", self.sm_str)
-      except:
+      except Exception as e:
+        print(e)
         print(self.sm_year + " " + "soil moisture image not found")
         self.sm_value = math.nan
         self.sm_str = "NA"
