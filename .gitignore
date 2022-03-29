@@ -1,3 +1,6 @@
 __pycache__
 extlibs_windows
 .github
+**/.ipynb_checkpoints/*
+.*.py
+.pyc
