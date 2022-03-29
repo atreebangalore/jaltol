@@ -225,22 +225,28 @@ class JaltolClass:
     
     def populate_layer_list(self,layer):
       if layer=='rain':
-        start,end=(2000,2020)
+        start,end=(2000,2021)
+        misc = []
       elif layer=='et':
-        start,end=(2003,2020)
+        start,end=(2003,2021)
+        misc = []
       elif layer=='sm':
-        start,end=(2015,2020)
+        start,end=(2015,2021)
+        misc = []
       elif layer=='groundwater':
         start,end=(1996,2016)
+        misc = ['2020']
       elif layer=='surfacewater':
         start,end=(2000,2021)
+        misc = []
       elif layer=='wbyear':
         start,end=(2000,2017)
+        misc = ['2020']
       else:
         print("incorrect layer name provided to populate layer list")
 
       li = list(range(start,end))
-      years = [str(yr) for yr in li]
+      years = [str(yr) for yr in li] + misc
 
       if layer=='rain':
         self.dlg.comboBox_9.clear()
