@@ -499,9 +499,9 @@ class JaltolClass:
 
 
     def print_water_balance(self):
-      self.alayer_crs = self.iface.activeLayer().crs().postgisSrid() #get EPSG code as integer
-      self.alayer_eeproj = ee.Projection('EPSG:'+ str(self.alayer_crs))
-      eeproj_wgs84 = ee.Projection('EPSG:4326')
+      self.alayer_crs = self.iface.activeLayer().crs().postgisSrid()       # Get EPSG code as integer
+      self.alayer_eeproj = ee.Projection('EPSG:'+ str(self.alayer_crs))    # Initialize EE Projection Custom
+      eeproj_wgs84 = ee.Projection('EPSG:4326')                            # Initialize EE Projection 4326
 
       # get just the geom (which may be Multipolygon or MultipolygonZ)
       self.geom_SelFea_1 = self.iface.activeLayer().selectedFeatures()[0].geometry()  
@@ -510,18 +510,20 @@ class JaltolClass:
       geometry = json.loads(self.geom_SelFea_1.coerceToType(QgsWkbTypes.MultiPolygon)[0].asJson())
 
       print(self.iface.activeLayer(),"\n","EPSG Code: ",self.alayer_crs)
-      #print(geometry['coordinates'][0][0][0:5])
+      # print(geometry['coordinates'][0][0])
 
       # make polygon with coords, and reproject to WGS 84, params are important as specified
-      self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=True,maxError=0.1,evenOdd=True) #.transform(eeproj_wgs84) #maxError=1,evenOdd=False
       
       if self.alayer_crs == 4326:
-        self.polygon_area = float(self.polygon.area().getInfo())
+        self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=True,maxError=0.1,evenOdd=True)
+      elif self.alayer_crs in [32642,32643,32644,32645,32646]:
+        self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=False,maxError=0.1,evenOdd=True)
       else:
-        self.polygon_area = (self.geom_SelFea_1.area())
+        self.polygon = ee.Geometry.MultiPolygon(geometry['coordinates'],self.alayer_eeproj,geodesic=False,maxError=0.1,evenOdd=True)
       # self.polygon_coords = self.polygon.coordinates().getInfo()
       # print(self.polygon_coords[0][0][0])
 
+      self.polygon_area = float(self.polygon.area(0.1).getInfo())
       print("area of polygon (in m2): ",self.polygon_area)
       self.calc_water_balance()
 
