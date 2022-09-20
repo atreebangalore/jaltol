@@ -29,7 +29,7 @@ class DW:
             ee.ImageCollection: Filtered DW collection
         """
         self.historical = self.dw.filterBounds(self.geometry).filterDate(ee.Date.fromYMD(
-            self.year-year_step, 1, 1), ee.Date.fromYMD(self.year+1, 1, 1)).select('label')
+            self.year-year_step, 6, 1), ee.Date.fromYMD(self.year+1, 6, 1)).select('label')
         return self.historical
 
     def get_seasonal(self, start_month: int, end_month: int, 
