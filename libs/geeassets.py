@@ -5,7 +5,8 @@ import ee
 ee.Initialize()
 
 iCol = {
-    'dw': ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1")
+    'dw': ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1"),
+    'refET': ee.ImageCollection('users/jaltol/ET_new/refCropET'),
 }
 
 fCol = {}
