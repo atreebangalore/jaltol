@@ -4,6 +4,7 @@ from .placenames import ST_names, DT_names
 from .geeassets import iCol
 from .dynamic_world import DW
 import os
+import pickle
 import pandas as pd
 from datetime import datetime
 from datetime import timedelta as td
@@ -18,11 +19,12 @@ class CropDetails:
     """get details of crops grown in the input geometry for a season or
     list of seasons provided.
     """
+
     def __init__(self, year: int, state: str, dist: str, season: Union[str, List[str]], geometry: ee.Geometry) -> None:
         self.geometry = geometry
         self.year = year
         self.state_n = state
-        self.state_abb = self.get_ST_abb() # get abb from placenames
+        self.state_abb = self.get_ST_abb()  # get abb from placenames
         self.dist_n = dist
         self.season = season.split() if type(season) == str else season
 
@@ -86,11 +88,12 @@ class CropDetails:
         Returns:
             pd.DataFrame: DataFrame of the Crop details
         """
-        # path to the pickle file(s)
-        pkl_path = os.path.join(os.path.dirname(
-            os.path.realpath(__file__)), 'data', 'crop_details')
-        csv = pd.read_pickle(os.path.join(
-            pkl_path, f'allcrops-allseasons-{self.state_abb}-201920.pkl.zip'))
+        # path to the pickle file
+        pkl_path = os.path.join(os.path.dirname(os.path.realpath(
+            __file__)), 'data', 'crop_details', 'allcrops-allseasons-allstates-201920.pkl.zip')
+        with open(pkl_path, 'rb') as f:
+            db = pickle.load(f)
+        csv = db[self.state_abb]
         # check if dist name in csv file or else search for names available
         # in the placenames.py until matches the dist name in database
         if self.dist_n.upper() in csv['district'].values:
@@ -151,6 +154,7 @@ class CWR:
     area in hectares
     sowing date in YYYY-MM-DD
     """
+
     def __init__(self, year: int, crop_details: Dict[str, Tuple[float, int, str, List[float], List[int]]]) -> None:
         self.year = year
         # {crop: (area_ha, area%, sowing date, Kc, period)}
