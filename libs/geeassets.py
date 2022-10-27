@@ -9,4 +9,7 @@ iCol = {
     'refET': ee.ImageCollection('users/jaltol/ET_new/refCropET'),
 }
 
-fCol = {}
+fCol = {
+    'dist2011' : ee.FeatureCollection('users/jaltol/FeatureCol/District_Map_2011'),
+    'hydrosheds': ee.FeatureCollection('users/jaltol/FeatureCol/Hydroshds_Jaltol'),
+}
