@@ -303,13 +303,19 @@ class JaltolClass:
 
     def make_gw_image(self):
       print(type(self.gw_year),self.gw_year)
-      rcstr = 'users/cseicomms/groundwater/recharge/' + self.gw_year
-      dcstr = 'users/cseicomms/groundwater/discharge/' + self.gw_year
-      systr = 'users/cseicomms/groundwater/sy_mean_cgwb'
-      rc = ee.Image(rcstr)
-      dc = ee.Image(dcstr)
+      # rcstr = 'users/cseicomms/groundwater/recharge/' + self.gw_year
+      # dcstr = 'users/cseicomms/groundwater/discharge/' + self.gw_year
+      # systr = 'users/cseicomms/groundwater/sy_mean_cgwb'
+      systr = 'users/jaltol/GW/sy_mean_cgwb'
+      gwstr = 'users/jaltol/GW/IndiaWRIS'
+      # rc = ee.Image(rcstr)
+      rcdate = ee.Date.fromYMD(int(self.gw_year)+1, 5, 1).getRange('month')
+      dcdate = ee.Date.fromYMD(int(self.gw_year), 5, 1).getRange('month')
+      rc = ee.ImageCollection(gwstr).filterDate(rcdate).first()
+      dc = ee.ImageCollection(gwstr).filterDate(dcdate).first()
+      # dc = ee.Image(dcstr)
       self.sy = ee.Image(systr).divide(100)
-      print(rcstr,dcstr,systr)
+      # print(rcstr,dcstr,systr)
       self.gw = rc.subtract(dc).multiply(1000).multiply(self.sy)
       print(type(self.gw))
 
